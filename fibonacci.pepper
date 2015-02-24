@@ -1,0 +1,41 @@
+player number_from_input:
+	i equals pass to input
+	n equals pass (i) to int
+	bump n
+
+def number_from_input_python():
+    i = input()
+    n = int(i)
+    return n
+
+player fibonacci takes (x):
+	previous equals 0
+	current equals 1
+	if x less than 0:
+		volley "Argument must be greater than 0!"
+	while x greater than 0:
+		current equals previous + current
+		previous equals current - previous
+		x equals x - 1
+	bump previous
+
+def fibonacci_python(x):
+    previous = 0
+    current = 1
+    if x <= 0:
+        raise "Argument must be greater than 0!"
+    while x >= 0:
+        current = previous + current
+        previous = current - previous
+        x = x - 1
+    return previous
+
+pass ("Enter n to compute the nth Fibonacci number") to print
+n equals pass to number_from_input
+f equals pass (n) to fibonacci
+pass (f) to print
+
+print("Enter n to compute the nth Fibonacci number")
+n = number_from_input()
+f = fibonacci(n)
+print(f)

@@ -1,0 +1,102 @@
+# Pepper Documentation
+# For language version: 1.0
+# Copyright 2013 smartfuse (Lucas Yan)
+
+# **** Getting Started **** #
+
+# An attribute describes something. Like here the attribute x equals 2.
+
+x equals 2
+
+# A player does something. It can take attributes and bump attributes back. It can also have its own attributes.
+
+player add takes (a, b):
+    n equals a + b
+    bump n
+
+# You can pass attributes to a player like this. After it completes, it will bump someting (or nothing) back. You can also set attributes to whatever a player bumps back.
+
+y equals pass (1, 2) to add
+
+# Some players take nothing and/or bump nothing.
+
+player nothing:
+    bump
+
+# Call a player that takes no attributes like this.
+
+pass to nothing
+
+# A team is a collection of players. The team can have attributes as a whole.
+# When a team is created, its starter player is always called.
+team AnotherTeam:
+    
+    # The starter takes in its team and also its team's starting conditions as its attributes.
+    player starter takes (my_team, starting_score):
+        # To get a team's attribute inside a player simply prefix it with my_team.
+        my_team.score equals starting_score
+        bump
+
+# A team can improve off another team. That means it gets all the players from the team it improves off of along with its attributes.
+
+team AwesomeTeam improves off AnotherTeam:
+
+    # Any other player in the team besides the starter takes in its team and also its attributes.
+	player display takes (my_team):
+		bump my_team.score
+
+
+# To create a new team, just do this and pass in the starting conditions. You can also set an attribute equal to the new team.
+
+cal_bears equals new AwesomeTeam with (3)
+
+# You can call players inside the team like this
+cal_bears_score equals pass to display of cal_bears
+
+# You can print attributes out by calling the print player
+pass (cal_bears_score) to print
+
+# Simple arithmetic also works
+two equals 1 + 1
+
+# You can check equalities and inequalities of attributes. Valid checks are greater than, greater than or equal to, less than, less than or equal to, not equal to, equals, is the same as, and is not the same as.
+
+player check takes (x, y):
+    if x equals y and x is not the same as y:
+        bump True
+    else:
+        bump False
+
+# You can also do something multiple times using loops.
+
+player loop takes (x):
+    while x greater than 0:
+        pass (x) to print
+        x equals x - 1
+    bump
+
+# You can also check for errors and halt if necessary by volleying.
+
+player divide takes (x, y):
+    if y equals 0:
+        volley "Divide by 0 error"
+    d equals x / y
+    bump d
+
+# **** Python Integration **** #
+
+# Any Python 3.0 function is automatically a player. Take input for example
+input_line equals pass to input
+
+# However to escape a quote use `quote and refrain from using pass and with as those are reserved keywords. Also, Pepper does not support single-quoted strings, any single-quoted string must be converted into a double-quoted string. In addition, you can import Python modules like this.
+
+import sys
+from os import system
+
+# To import players from other Pepper files like this
+add players from file.pepper
+
+# Python datatypes also work.
+naughty_children equals ["Joe", "john"]
+
+

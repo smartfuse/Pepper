@@ -1,0 +1,4 @@
+pass ("hello world") to print
+pass ("hi") to print
+x equals pass to input
+pass (x) to print

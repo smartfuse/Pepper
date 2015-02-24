@@ -1,0 +1,109 @@
+#! /usr/bin/env python3
+
+import sys, os
+
+# Converts custom syntax to python syntax. Takes a string as input.
+
+def pepper_convert(code):
+    includes = []
+    def convert_line(subject):
+        if subject.find("add players from") != -1:
+            includes.append(subject.replace("add players from", "").strip())
+            return ""
+        
+        if subject.find("player") != -1:
+            subject = subject.replace("starter", "__init__")
+            if subject.find("takes") == -1:
+                subject = subject.replace("player", "def").replace(":", "") + "():"
+            else:
+                subject = subject.replace("player", "def").replace("takes", "")
+
+        if subject.find("if") != -1 or subject.find("while") != -1:
+            subject = subject.replace("greater than or equal to", ">=").replace("less than or equal to", "<=").replace("greater than", ">").replace("less than", "<").replace("not equal to", "!=").replace("not equal", "!=").replace("not equals", "!=").replace("equals", "==").replace("equal", "==")
+        
+        subject = subject.replace("new", "")
+        subject = subject.replace("with", "")
+        subject = subject.replace("is the same as", "is")
+        subject = subject.replace("is not the same as", "is not")
+        subject = subject.replace("equals", "=")
+        subject = subject.replace("else if", "elif")
+        subject = subject.replace("`quote", "\"")
+        subject = subject.replace("bump", "return")
+        return subject
+
+    def process_line(subject):
+        if subject.find("pass") != -1 and not(subject.find("\"") != -1 and subject.find("pass") > subject.find("\"")):
+            end_index = subject.find("pass")
+            subject = subject.replace("pass ", "", 1)
+            arg_open_index = subject.find("(")
+            if arg_open_index != -1:                
+                arg_closed_index = subject.find(")")
+                args = subject[arg_open_index+1:arg_closed_index]
+            else:
+                args = ""
+            function_name_index = subject.rfind(" to ")
+            function_name_index = function_name_index + 3
+            function_name = subject[function_name_index + 1:]
+            if function_name.find(" of ") != -1:
+                function = function_name[:function_name.find(" of ")]
+                team = function_name[function_name.find(" of "):].replace(" of ", "")
+                function_name = team + "." + function
+            
+            subject = subject[:end_index].replace("equals", "=") + function_name + "(" + args + ")"
+            subject = subject.replace("`quote", "\\\"")
+            return subject
+
+        if subject.find("volley") != -1 and not (subject.find("\"") != -1 and subject.find("volley") > subject.find("\"")):
+            subject = subject.replace("volley", "raise Exception(")
+            subject = subject + ")"
+            return subject
+        
+        if subject.find("team ") != -1 and not (subject.find("\"") != -1 and subject.find("team") > subject.find("\"")):
+            subject = subject.replace("team", "class")
+            if subject.find("improves off") != -1:
+                subject = subject.replace("improves off", "(")
+                subject = subject.replace(":", "") + "):"
+            return subject
+
+        clean = subject.split("\"")
+        index = 0
+        while index < len(clean):
+            clean[index] = convert_line(clean[index])
+            index += 2
+        index = 1
+        result = ""
+        while index < len(clean):
+            result = result + "\""+ clean[index]
+            index += 1
+        result = clean[0] + result
+        return result
+
+    instructions = code.split("\n")
+    includes = []
+    for i in range(len(instructions)):
+        instructions[i] = process_line(instructions[i])
+        instructions[i] = instructions[i] + "\n"
+    
+    for i in range(len(includes)):
+        new_instructions = [pepper_convert(open(includes[i], "r").read())]
+        new_instructions.extend(instructions)
+        instructions = new_instructions
+
+    return "".join(instructions)
+
+args = sys.argv
+keep_output = False
+if len(args) == 3 and args[2] == "python":
+    keep_output = True
+print("Pepper Runtime Environment")
+if len(args) == 1:
+    print("\nError: no input file")
+else:
+    open(args[1].replace("pepper", "py"), "w").write(pepper_convert(open(args[1], "r").read()))
+    print("\nOutput: " + args[1].replace("pepper", "py"))
+    print("OK")
+    print("Program output:")
+    print()
+    os.system("python3 " + args[1].replace("pepper", "py"))
+    if not keep_output:
+        os.system("rm " + args[1].replace("pepper", "py"))
